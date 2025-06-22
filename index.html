@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Go6 Raider - Progress Tracker</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+:root {
+    --primary: #6e44ff;
+    --primary-dark: #4c1c7b;
+    --primary-darker: #1a0b2e;
+    --accent: #ff4d9e;
+    --accent-light: #ff6bff;
+    --text: rgba(255, 255, 255, 0.9);
+    --text-light: rgba(255, 255, 255, 0.7);
+    --dark-1: #0a0415;
+    --dark-2: #120825;
+    --dark-3: #1a1035;
+    --glass: rgba(255, 255, 255, 0.05);
+    --success: #4ade80;
+    --warning: #facc15;
+    --danger: #f87171;
+    --info: #60a5fa;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background: var(--dark-1);
+    color: var(--text);
+    line-height: 1.6;
+    overflow-x: hidden;
+    position: relative;
+}
+
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: 
+        radial-gradient(circle at 10% 20%, rgba(110, 68, 255, 0.15) 0%, transparent 25%),
+        radial-gradient(circle at 90% 80%, rgba(255, 77, 158, 0.15) 0%, transparent 25%),
+        linear-gradient(to bottom, var(--dark-1), var(--primary-darker));
+    z-index: -2;
+}
+
+body::after {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: 
+        linear-gradient(rgba(125, 60, 255, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(125, 60, 255, 0.05) 1px, transparent 1px);
+    background-size: 40px 40px;
+    z-index: -1;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.header {
+    padding: 30px 0;
+    position: relative;
+    z-index: 10;
+}
+
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 0;
+    border-bottom: 1px solid rgba(125, 60, 255, 0.2);
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.8rem;
+    font-weight: 700;
+    background: linear-gradient(90deg, var(--primary), var(--accent));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    text-decoration: none;
+}
+
+.logo-icon {
+    font-size: 2rem;
+}
+
+.cta-buttons {
+    display: flex;
+    gap: 15px;
+}
+
+.btn {
+    padding: 10px 25px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-primary {
+    background: linear-gradient(45deg, var(--primary), var(--accent));
+    color: white;
+    border: none;
+    box-shadow: 0 4px 15px rgba(110, 68, 255, 0.3);
+}
+
+.btn-discord {
+    background: #5865F2;
+    color: white;
+    border: none;
+    box-shadow: 0 4px 15px rgba(88, 101, 242, 0.3);
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(110, 68, 255, 0.4);
+}
+
+.btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: 0.5s;
+}
+
+.btn:hover::before {
+    left: 100%;
+}
+
+.progress-section {
+    padding: 100px 0;
+    position: relative;
+}
+
+.section-title {
+    text-align: center;
+    margin-bottom: 60px;
+}
+
+.section-title h2 {
+    font-size: 2.5rem;
+    margin-bottom: 15px;
+    background: linear-gradient(90deg, white, var(--primary));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+.progress-container {
+    background: rgba(26, 11, 46, 0.7);
+    border-radius: 12px;
+    padding: 40px;
+    border: 1px solid rgba(125, 60, 255, 0.2);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(10px);
+}
+
+.progress-category {
+    margin-bottom: 40px;
+}
+
+.progress-category h3 {
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.progress-items {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.progress-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 15px;
+    border-radius: 8px;
+    background: rgba(28, 16, 53, 0.5);
+    transition: all 0.3s ease;
+    border: 1px solid rgba(125, 60, 255, 0.1);
+}
+
+.progress-item:hover {
+    background: rgba(110, 68, 255, 0.15);
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(110, 68, 255, 0.2);
+}
+
+.status-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+}
+
+.status-done .status-icon {
+    background: rgba(74, 222, 128, 0.1);
+    color: var(--success);
+    border: 1px solid var(--success);
+}
+
+.status-wip .status-icon {
+    background: rgba(250, 204, 21, 0.1);
+    color: var(--warning);
+    border: 1px solid var(--warning);
+}
+
+.status-todo .status-icon {
+    background: rgba(248, 113, 113, 0.1);
+    color: var(--danger);
+    border: 1px solid var(--danger);
+}
+
+.progress-text {
+    flex: 1;
+}
+
+.progress-text h4 {
+    font-size: 1.1rem;
+    margin-bottom: 5px;
+}
+
+.progress-text p {
+    color: var(--text-light);
+    font-size: 0.9rem;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.status-wip .status-icon i {
+    animation: spin 1.5s linear infinite;
+}
+
+.stats {
+    background: rgba(26, 11, 46, 0.7);
+    padding: 80px 0;
+    border-radius: 20px;
+    margin: 50px 0;
+    border: 1px solid rgba(125, 60, 255, 0.2);
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+}
+
+.stats::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(110, 68, 255, 0.05) 0%, transparent 70%);
+    animation: rotate 30s linear infinite;
+    z-index: -1;
+}
+
+@keyframes rotate {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 30px;
+    text-align: center;
+}
+
+.stat-item h3 {
+    font-size: 3rem;
+    font-weight: 700;
+    background: linear-gradient(90deg, white, var(--accent-light));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    margin-bottom: 10px;
+}
+
+.stat-item p {
+    color: var(--text-light);
+    font-size: 1.1rem;
+}
+
+.disclaimer-box {
+    background: rgba(26, 11, 46, 0.7);
+    border-radius: 12px;
+    padding: 30px;
+    margin: 50px auto;
+    max-width: 800px;
+    border: 1px solid rgba(125, 60, 255, 0.2);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(10px);
+    border-left: 4px solid var(--accent);
+}
+
+.disclaimer-box h3 {
+    color: var(--accent);
+    font-size: 1.5rem;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.disclaimer-box p {
+    color: var(--text-light);
+    margin-bottom: 15px;
+    line-height: 1.7;
+}
+
+.disclaimer-box .highlight {
+    color: var(--text);
+    font-weight: 500;
+}
+
+.footer {
+    background: var(--dark-2);
+    padding: 60px 0 30px;
+    border-top: 1px solid rgba(125, 60, 255, 0.2);
+    text-align: center;
+}
+
+.footer-bottom {
+    padding-top: 30px;
+    color: var(--text-light);
+    font-size: 0.9rem;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+.floating {
+    animation: float 3s ease-in-out infinite;
+}
+
+@media (max-width: 768px) {
+    .progress-items {
+        grid-template-columns: 1fr;
+    }
+    
+    .section-title h2 {
+        font-size: 2rem;
+    }
+    
+    .navbar {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .cta-buttons {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .disclaimer-box {
+        padding: 20px;
+        margin: 30px auto;
+    }
+}
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <nav class="navbar">
+                <a href="#" class="logo">
+                    <i class="fas fa-bolt logo-icon"></i>
+                    <span>Go6 Raider</span>
+                </a>
+                <div class="cta-buttons">
+                    <a href="https://discord.gg/XJHUaQPT24" target="_blank" class="btn btn-discord">
+                        <i class="fab fa-discord"></i> Discord
+                    </a>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <section class="progress-section">
+        <div class="container">
+            <div class="section-title">
+                <h2>Development Progress</h2>
+                <p>Tracking the completion status of all features</p>
+            </div>
+            
+            <div class="progress-container">
+
+                <div class="progress-category">
+                    <h3><i class="fas fa-tachometer-alt"></i> Dashboard</h3>
+                    <div class="progress-items">
+                        <div class="progress-item status-done">
+                            <div class="status-icon">
+                                <i class="fas fa-check"></i>
+                            </div>
+                            <div class="progress-text">
+                                <h4>Overview</h4>
+                                <p>Completed and fully functional</p>
+                            </div>
+                        </div>
+                        
+                        <div class="progress-item status-done">
+                            <div class="status-icon">
+                                <i class="fas fa-check"></i>
+                            </div>
+                            <div class="progress-text">
+                                <h4>Console</h4>
+                                <p>Completed and fully functional</p>
+                            </div>
+                        </div>
+                        
+                        <div class="progress-item status-done">
+                            <div class="status-icon">
+                                <i class="fas fa-check"></i>
+                            </div>
+                            <div class="progress-text">
+                                <h4>Settings</h4>
+                                <p>Completed and fully functional</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="progress-category">
+                    <h3><i class="fas fa-users"></i> Guild Manager</h3>
+                    <div class="progress-items">
+                        <div class="progress-item status-done">
+                            <div class="status-icon">
+                                <i class="fas fa-check"></i>
+                            </div>
+                            <div class="progress-text">
+                                <h4>Guild Joiner</h4>
+                                <p>Completed and fully functional</p>
+                            </div>
+                        </div>
+                        
+                        <div class="progress-item status-done">
+                            <div class="status-icon">
+                                <i class="fas fa-check"></i>
+                            </div>
+                            <div class="progress-text">
+                                <h4>Guild Leaver</h4>
+                                <p>Completed and fully functional</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="progress-category">
+                    <h3><i class="fas fa-unlock-alt"></i> Bypasses</h3>
+                    <div class="progress-items">
+                        <div class="progress-item status-done">
+                            <div class="status-icon">
+                                <i class="fas fa-check"></i>
+                            </div>
+                            <div class="progress-text">
+                                <h4>Rules</h4>
+                                <p>Completed and fully functional</p>
+                            </div>
+                        </div>
+                        
+                        <div class="progress-item status-done">
+                            <div class="status-icon">
+                                <i class="fas fa-check"></i>
+                            </div>
+                            <div class="progress-text">
+                                <h4>Onboarding</h4>
+                                <p>Completed and fully functional</p>
+                            </div>
+                        </div>
+                        
+                        <div class="progress-item status-done">
+                            <div class="status-icon">
+                                <i class="fas fa-check"></i>
+                            </div>
+                            <div class="progress-text">
+                                <h4>Button</h4>
+                                <p>Completed and fully functional</p>
+                            </div>
+                        </div>
+                        
+                        <div class="progress-item status-done">
+                            <div class="status-icon">
+                                <i class="fas fa-check"></i>
+                            </div>
+                            <div class="progress-text">
+                                <h4>Reaction</h4>
+                                <p>Completed and fully functional</p>
+                            </div>
+                        </div>
+                        
+                        <div class="progress-item status-done">
+                            <div class="status-icon">
+                                <i class="fas fa-check"></i>
+                            </div>
+                            <div class="progress-text">
+                                <h4>Restorecord</h4>
+                                <p>Completed and fully functional</p>
+                            </div>
+                        </div>
+                        
+                        <div class="progress-item status-done">
+                            <div class="status-icon">
+                                <i class="fas fa-check"></i>
+                            </div>
+                            <div class="progress-text">
+                                <h4>Vaultcord</h4>
+                                <p>Completed and fully functional</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="progress-category">
+                    <h3><i class="fas fa-comment-dots"></i> Spammer</h3>
+                    <div class="progress-items">
+                        <div class="progress-item status-done">
+                            <div class="status-icon">
+                                <i class="fas fa-check"></i>
+                            </div>
+                            <div class="progress-text">
+                                <h4>Message</h4>
+                                <p>Completed and fully functional</p>
+                            </div>
+                        </div>
+                        
+                        <div class="progress-item status-done">
+                            <div class="status-icon">
+                                <i class="fas fa-check"></i>
+                            </div>
+                            <div class="progress-text">
+                                <h4>Reply</h4>
+                                <p>Completed and fully functional</p>
+                            </div>
+                        </div>
+                        
+                        <div class="progress-item status-done">
+                            <div class="status-icon">
+                                <i class="fas fa-check"></i>
+                            </div>
+                            <div class="progress-text">
+                                <h4>Poll</h4>
+                                <p>Completed and fully functional</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="progress-category">
+                    <h3><i class="fas fa-key"></i> Token Manager</h3>
+                    <div class="progress-items">
+                        <div class="progress-item status-done">
+                            <div class="status-icon">
+                                <i class="fas fa-check"></i>
+                            </div>
+                            <div class="progress-text">
+                                <h4>Token Checker</h4>
+                                <p>Completed and fully functional</p>
+                            </div>
+                        </div>
+                        
+                        <div class="progress-item status-done">
+                            <div class="status-icon">
+                                <i class="fas fa-check"></i>
+                            </div>
+                            <div class="progress-text">
+                                <h4>Status Rotator</h4>
+                                <p>Completed and fully functional</p>
+                            </div>
+                        </div>
+                        
+                        <div class="progress-item status-wip">
+                            <div class="status-icon">
+                                <i class="fas fa-spinner"></i>
+                            </div>
+                            <div class="progress-text">
+                                <h4>Token Customizer</h4>
+                                <p>In development</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="progress-category">
+                    <h3><i class="fas fa-database"></i> Fetcher</h3>
+                    <div class="progress-items">
+                        <div class="progress-item status-done">
+                            <div class="status-icon">
+                                <i class="fas fa-check"></i>
+                            </div>
+                            <div class="progress-text">
+                                <h4>Member IDs Fetcher</h4>
+                                <p>Completed and fully functional</p>
+                            </div>
+                        </div>
+                        
+                        <div class="progress-item status-wip">
+                            <div class="status-icon">
+                                <i class="fas fa-spinner"></i>
+                            </div>
+                            <div class="progress-text">
+                                <h4>Second Method</h4>
+                                <p>In development</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="progress-category">
+                    <h3><i class="fas fa-gem"></i> Boosts</h3>
+                    <div class="progress-items">
+                        <div class="progress-item status-todo">
+                            <div class="status-icon">
+                                <i class="fas fa-times"></i>
+                            </div>
+                            <div class="progress-text">
+                                <h4>Server Booster</h4>
+                                <p>Planned for future release</p>
+                            </div>
+                        </div>
+                        
+                        <div class="progress-item status-todo">
+                            <div class="status-icon">
+                                <i class="fas fa-times"></i>
+                            </div>
+                            <div class="progress-text">
+                                <h4>Boosts Checker</h4>
+                                <p>Planned for future release</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="progress-category">
+                    <h3><i class="fas fa-cogs"></i> Other Features</h3>
+                    <div class="progress-items">
+                        <div class="progress-item status-done">
+                            <div class="status-icon">
+                                <i class="fas fa-check"></i>
+                            </div>
+                            <div class="progress-text">
+                                <h4>Proxy Support</h4>
+                                <p>Completed and fully functional</p>
+                            </div>
+                        </div>
+                        
+                        <div class="progress-item status-done">
+                            <div class="status-icon">
+                                <i class="fas fa-check"></i>
+                            </div>
+                            <div class="progress-text">
+                                <h4>Max Threads</h4>
+                                <p>Completed and fully functional</p>
+                            </div>
+                        </div>
+                        
+                        <div class="progress-item status-done">
+                            <div class="status-icon">
+                                <i class="fas fa-check"></i>
+                            </div>
+                            <div class="progress-text">
+                                <h4>Log Storage</h4>
+                                <p>Completed and fully functional</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+<section class="stats">
+    <div class="container">
+        <div class="section-title">
+            <h2>Why Choose Go6 Raider?</h2>
+            <p>Powerful features, constant innovation, and unmatched support</p>
+        </div>
+        
+        <div class="stats-grid">
+            <div class="stat-item">
+                <h3>100%</h3>
+                <p>Open Source</p>
+            </div>
+            
+            <div class="stat-item">
+                <h3>20+</h3>
+                <p>Unique Features</p>
+            </div>
+            
+
+            
+            <div class="stat-item">
+                <h3>0$</h3>
+                <p>Completely Free Premium Features</p>
+            </div>
+            
+            <div class="stat-item">
+                <h3>Always</h3>
+                <p>Up-to-Date & Actively Maintained</p>
+            </div>
+            
+            <div class="stat-item">
+                <h3>100%</h3>
+                <p>Creative Workarounds to Any Issue</p>
+            </div>
+            
+            <div class="stat-item">
+                <h3>24/7</h3>
+                <p>Community Support for Beginners</p>
+            </div>
+            
+            <div class="stat-item">
+                <h3>High Quality</h3>
+                <p>Advanced Joiner Included</p>
+            </div>
+            
+            <div class="stat-item">
+                <h3>Many</h3>
+                <p>Bypasses for Maximum Efficiency</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="container">
+    <div class="disclaimer-box">
+        <h3><i class="fas fa-info-circle"></i> About the Development Process</h3>
+        <p>This project is <span class="highlight">100% open source</span>, and I want to be open about how it was made:</p>
+        
+        <p>Some parts were created with help from AI, but <span class="highlight">not because I had to</span> — I already had working code from earlier projects. I used AI to help adjust these parts for this project, which saved me a lot of time.</p>
+        
+        <p>When I switched to pywebview, many functions needed changes to work properly. Instead of rewriting everything by hand, I used AI to handle the repetitive parts so I could focus on the main work and make sure everything fit together well.</p>
+        
+        <p>I have carefully checked every part of the code, and I take full responsibility for how the final version works. Some parts of the UI also use AI-generated elements to keep things looking consistent, which saved me from doing a lot of small, manual changes.</p>
+        
+        <p>This is a <span class="highlight">free tool</span> that I'm building in my free time. If you find any problems, feel free to DM me (.gekkefries1) — I really appreciate any feedback!</p>
+    </div>
+</div>
+
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-bottom">
+                <p>&copy; 2025 Go6 Raider. All rights reserved. This project is not affiliated with Discord</p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
